@@ -45,11 +45,19 @@ export default function Index() {
   const [donationAmount, setDonationAmount] = useState('');
   const [sortBy, setSortBy] = useState<'viewers' | 'rating'>('viewers');
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const categories = ['Все', ...Array.from(new Set(MOCK_STREAMS.map(s => s.category)))];
 
   const filteredAndSortedStreams = MOCK_STREAMS
-    .filter(stream => selectedCategory === 'Все' || stream.category === selectedCategory)
+    .filter(stream => {
+      const matchesCategory = selectedCategory === 'Все' || stream.category === selectedCategory;
+      const matchesSearch = searchQuery === '' || 
+        stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.streamer.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
     .sort((a, b) => {
       if (sortBy === 'viewers') return b.viewers - a.viewers;
       return b.rating - a.rating;
@@ -92,9 +100,33 @@ export default function Index() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon">
-              <Icon name="Search" className="h-4 w-4" />
-            </Button>
+            <div className="relative">
+              {isSearchOpen && (
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск по названию или автору..."
+                  className="w-64 animate-fade-in"
+                  autoFocus
+                  onBlur={() => {
+                    if (searchQuery === '') {
+                      setTimeout(() => setIsSearchOpen(false), 200);
+                    }
+                  }}
+                />
+              )}
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => {
+                  setIsSearchOpen(!isSearchOpen);
+                  if (isSearchOpen) setSearchQuery('');
+                }}
+                className={isSearchOpen ? 'ml-2' : ''}
+              >
+                {isSearchOpen ? <Icon name="X" className="h-4 w-4" /> : <Icon name="Search" className="h-4 w-4" />}
+              </Button>
+            </div>
             <Button variant="outline" size="icon">
               <Icon name="Bell" className="h-4 w-4" />
             </Button>
