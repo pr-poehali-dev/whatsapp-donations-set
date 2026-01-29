@@ -11,12 +11,12 @@ import Icon from '@/components/ui/icon';
 const EMOJI_LIST = ['❤️', '🔥', '👍', '😂', '😮', '🎉', '💎', '⭐'];
 
 const MOCK_STREAMS = [
-  { id: 1, title: 'Топовая игра в Valorant', streamer: 'ProGamer', viewers: 12543, category: 'Игры', thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=225&fit=crop' },
-  { id: 2, title: 'Рисую портреты на заказ', streamer: 'ArtMaster', viewers: 3421, category: 'Творчество', thumbnail: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=225&fit=crop' },
-  { id: 3, title: 'Учу программированию с нуля', streamer: 'CodeGuru', viewers: 8234, category: 'Образование', thumbnail: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop' },
-  { id: 4, title: 'Готовлю пасту карбонара', streamer: 'ChefLife', viewers: 5123, category: 'Кулинария', thumbnail: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=225&fit=crop' },
-  { id: 5, title: 'Покатушки на машине', streamer: 'Racer777', viewers: 9876, category: 'Авто', thumbnail: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=225&fit=crop' },
-  { id: 6, title: 'Разбор треков битмейкинга', streamer: 'BeatKing', viewers: 4532, category: 'Музыка', thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=225&fit=crop' },
+  { id: 1, title: 'Топовая игра в Valorant', streamer: 'ProGamer', viewers: 12543, rating: 4.8, category: 'Игры', thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=225&fit=crop' },
+  { id: 2, title: 'Рисую портреты на заказ', streamer: 'ArtMaster', viewers: 3421, rating: 4.9, category: 'Творчество', thumbnail: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=225&fit=crop' },
+  { id: 3, title: 'Учу программированию с нуля', streamer: 'CodeGuru', viewers: 8234, rating: 4.7, category: 'Образование', thumbnail: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop' },
+  { id: 4, title: 'Готовлю пасту карбонара', streamer: 'ChefLife', viewers: 5123, rating: 4.6, category: 'Кулинария', thumbnail: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=225&fit=crop' },
+  { id: 5, title: 'Покатушки на машине', streamer: 'Racer777', viewers: 9876, rating: 4.5, category: 'Авто', thumbnail: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=225&fit=crop' },
+  { id: 6, title: 'Разбор треков битмейкинга', streamer: 'BeatKing', viewers: 4532, rating: 4.8, category: 'Музыка', thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=225&fit=crop' },
 ];
 
 const MOCK_MESSAGES = [
@@ -43,6 +43,17 @@ export default function Index() {
   const [chatMessage, setChatMessage] = useState('');
   const [messages, setMessages] = useState(MOCK_MESSAGES);
   const [donationAmount, setDonationAmount] = useState('');
+  const [sortBy, setSortBy] = useState<'viewers' | 'rating'>('viewers');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Все');
+
+  const categories = ['Все', ...Array.from(new Set(MOCK_STREAMS.map(s => s.category)))];
+
+  const filteredAndSortedStreams = MOCK_STREAMS
+    .filter(stream => selectedCategory === 'Все' || stream.category === selectedCategory)
+    .sort((a, b) => {
+      if (sortBy === 'viewers') return b.viewers - a.viewers;
+      return b.rating - a.rating;
+    });
 
   const sendMessage = () => {
     if (chatMessage.trim()) {
@@ -98,22 +109,46 @@ export default function Index() {
         <div className="grid lg:grid-cols-[1fr_380px] gap-6">
           <div className="space-y-6">
             <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">Популярные трансляции</h2>
-                <div className="flex gap-2">
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
-                    <Icon name="Flame" className="mr-1 h-3 w-3" />
-                    Популярное
-                  </Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
-                    <Icon name="Clock" className="mr-1 h-3 w-3" />
-                    Новое
-                  </Badge>
+              <div className="flex flex-col gap-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Популярные трансляции</h2>
+                  <div className="flex gap-2">
+                    <Badge 
+                      variant={sortBy === 'viewers' ? 'default' : 'outline'}
+                      className="cursor-pointer hover:bg-primary/10"
+                      onClick={() => setSortBy('viewers')}
+                    >
+                      <Icon name="Eye" className="mr-1 h-3 w-3" />
+                      По зрителям
+                    </Badge>
+                    <Badge 
+                      variant={sortBy === 'rating' ? 'default' : 'outline'}
+                      className="cursor-pointer hover:bg-primary/10"
+                      onClick={() => setSortBy('rating')}
+                    >
+                      <Icon name="Star" className="mr-1 h-3 w-3" />
+                      По рейтингу
+                    </Badge>
+                  </div>
                 </div>
+                <ScrollArea className="w-full">
+                  <div className="flex gap-2 pb-2">
+                    {categories.map((cat) => (
+                      <Badge
+                        key={cat}
+                        variant={selectedCategory === cat ? 'default' : 'outline'}
+                        className="cursor-pointer whitespace-nowrap animate-scale-in"
+                        onClick={() => setSelectedCategory(cat)}
+                      >
+                        {cat}
+                      </Badge>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {MOCK_STREAMS.map((stream, index) => (
+                {filteredAndSortedStreams.map((stream, index) => (
                   <Card 
                     key={stream.id}
                     className="group overflow-hidden cursor-pointer border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 animate-fade-in"
@@ -150,9 +185,15 @@ export default function Index() {
                           <p className="text-xs text-muted-foreground">{stream.streamer}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        {stream.category}
-                      </Badge>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">
+                          {stream.category}
+                        </Badge>
+                        <div className="flex items-center gap-1 text-yellow-500">
+                          <Icon name="Star" className="h-3 w-3 fill-current" />
+                          <span className="text-xs font-semibold">{stream.rating}</span>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 ))}
