@@ -41,6 +41,24 @@ const COMMUNITIES = [
   { id: 4, name: 'Образование', icon: '📚', members: 19500 },
 ];
 
+const MOCK_USERS = [
+  { id: 1, name: 'Alex_92', avatar: 'A', online: true, lastSeen: 'Онлайн' },
+  { id: 2, name: 'MarinaK', avatar: 'M', online: false, lastSeen: '5 мин назад' },
+  { id: 3, name: 'GamerPro', avatar: 'G', online: true, lastSeen: 'Онлайн' },
+  { id: 4, name: 'CodeGuru', avatar: 'C', online: false, lastSeen: '1 час назад' },
+  { id: 5, name: 'ArtMaster', avatar: 'A', online: true, lastSeen: 'Онлайн' },
+];
+
+const MOCK_CONVERSATIONS = [
+  { userId: 1, messages: [
+    { id: 1, text: 'Привет! Как дела?', from: 'Alex_92', timestamp: '14:32' },
+    { id: 2, text: 'Отлично! Смотрел твой последний стрим', from: 'Alex_92', timestamp: '14:33' },
+  ]},
+  { userId: 2, messages: [
+    { id: 1, text: 'Спасибо за рейд! 🔥', from: 'MarinaK', timestamp: '12:15' },
+  ]},
+];
+
 export default function Index() {
   const [chatMessage, setChatMessage] = useState('');
   const [messages, setMessages] = useState(MOCK_MESSAGES);
@@ -50,6 +68,33 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [privateMessage, setPrivateMessage] = useState('');
+  const [conversations, setConversations] = useState(MOCK_CONVERSATIONS);
+
+  const sendPrivateMessage = () => {
+    if (privateMessage.trim() && selectedUser !== null) {
+      const userConv = conversations.find(c => c.userId === selectedUser);
+      const newMsg = {
+        id: Date.now(),
+        text: privateMessage,
+        from: 'Вы',
+        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      if (userConv) {
+        setConversations(conversations.map(c => 
+          c.userId === selectedUser 
+            ? { ...c, messages: [...c.messages, newMsg] }
+            : c
+        ));
+      } else {
+        setConversations([...conversations, { userId: selectedUser, messages: [newMsg] }]);
+      }
+      setPrivateMessage('');
+    }
+  };
 
   const categories = ['Все', ...Array.from(new Set(MOCK_STREAMS.map(s => s.category)))];
 
@@ -130,6 +175,12 @@ export default function Index() {
                 {isSearchOpen ? <Icon name="X" className="h-4 w-4" /> : <Icon name="Search" className="h-4 w-4" />}
               </Button>
             </div>
+            <Button variant="outline" size="icon" onClick={() => setIsMessagesOpen(true)}>
+              <Icon name="MessageSquare" className="h-4 w-4" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-red-500">
+                3
+              </Badge>
+            </Button>
             <Button variant="outline" size="icon">
               <Icon name="Bell" className="h-4 w-4" />
             </Button>
@@ -587,6 +638,148 @@ export default function Index() {
                 <Icon name="Settings" className="mr-2 h-4 w-4" />
                 Настройки
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isMessagesOpen} onOpenChange={setIsMessagesOpen}>
+        <DialogContent className="max-w-4xl h-[600px] p-0">
+          <div className="grid grid-cols-[300px_1fr] h-full">
+            <div className="border-r border-border">
+              <div className="p-4 border-b border-border">
+                <h3 className="font-bold text-lg">Сообщения</h3>
+                <Input 
+                  placeholder="Поиск контактов..." 
+                  className="mt-2"
+                />
+              </div>
+              <ScrollArea className="h-[calc(600px-80px)]">
+                <div className="p-2 space-y-1">
+                  {MOCK_USERS.map((user) => {
+                    const hasMessages = conversations.find(c => c.userId === user.id);
+                    const unreadCount = user.id === 1 ? 2 : user.id === 2 ? 1 : 0;
+                    
+                    return (
+                      <div
+                        key={user.id}
+                        onClick={() => setSelectedUser(user.id)}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          selectedUser === user.id 
+                            ? 'bg-primary/10 border border-primary/50' 
+                            : 'hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                                {user.avatar}
+                              </AvatarFallback>
+                            </Avatar>
+                            {user.online && (
+                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-sm">{user.name}</span>
+                              {unreadCount > 0 && (
+                                <Badge className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-red-500">
+                                  {unreadCount}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.lastSeen}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <div className="flex flex-col">
+              {selectedUser !== null ? (
+                <>
+                  <div className="p-4 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                          {MOCK_USERS.find(u => u.id === selectedUser)?.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-semibold">
+                          {MOCK_USERS.find(u => u.id === selectedUser)?.name}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {MOCK_USERS.find(u => u.id === selectedUser)?.lastSeen}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-3">
+                      {conversations
+                        .find(c => c.userId === selectedUser)
+                        ?.messages.map((msg) => (
+                          <div
+                            key={msg.id}
+                            className={`flex ${msg.from === 'Вы' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                                msg.from === 'Вы'
+                                  ? 'gradient-primary text-white'
+                                  : 'bg-muted'
+                              }`}
+                            >
+                              <p className="text-sm">{msg.text}</p>
+                              <p className={`text-xs mt-1 ${
+                                msg.from === 'Вы' ? 'text-white/70' : 'text-muted-foreground'
+                              }`}>
+                                {msg.timestamp}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      {(!conversations.find(c => c.userId === selectedUser) || 
+                        conversations.find(c => c.userId === selectedUser)?.messages.length === 0) && (
+                        <div className="text-center text-muted-foreground py-8">
+                          Начните переписку!
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+
+                  <div className="p-4 border-t border-border">
+                    <div className="flex gap-2">
+                      <Input
+                        value={privateMessage}
+                        onChange={(e) => setPrivateMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendPrivateMessage()}
+                        placeholder="Написать сообщение..."
+                        className="flex-1"
+                      />
+                      <Button onClick={sendPrivateMessage} className="gradient-primary">
+                        <Icon name="Send" className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <Icon name="MessageSquare" className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                    <p>Выберите контакт для начала переписки</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>
