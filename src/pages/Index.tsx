@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 
 const EMOJI_LIST = ['❤️', '🔥', '👍', '😂', '😮', '🎉', '💎', '⭐'];
@@ -47,6 +49,7 @@ export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const categories = ['Все', ...Array.from(new Set(MOCK_STREAMS.map(s => s.category)))];
 
@@ -130,7 +133,11 @@ export default function Index() {
             <Button variant="outline" size="icon">
               <Icon name="Bell" className="h-4 w-4" />
             </Button>
-            <Avatar className="h-9 w-9 border-2 border-primary">
+            <Avatar 
+              className="h-9 w-9 border-2 border-primary cursor-pointer hover:scale-110 transition-transform"
+              onClick={() => setIsProfileOpen(true)}
+            >
+              <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" />
               <AvatarFallback className="gradient-primary text-white">U</AvatarFallback>
             </Avatar>
           </div>
@@ -382,35 +389,208 @@ export default function Index() {
               </Tabs>
             </Card>
 
-            <Card className="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-10 w-10 rounded-full gradient-primary flex items-center justify-center">
-                    <Icon name="Trophy" className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Ваш профиль</h3>
-                    <p className="text-xs text-muted-foreground">Level 12 • Streamer</p>
+            <Card className="p-5 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-16 w-16 border-2 border-primary">
+                    <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" />
+                    <AvatarFallback className="gradient-primary text-white text-xl">U</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">UserName</h3>
+                    <p className="text-xs text-muted-foreground">@username_pro</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge className="text-xs gradient-primary">Level 12</Badge>
+                      <Badge variant="outline" className="text-xs">Streamer</Badge>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1">
+
+                <div className="space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span>Опыт</span>
-                    <span className="text-primary">2,450 / 3,000</span>
+                    <span className="text-muted-foreground">Опыт до Level 13</span>
+                    <span className="text-primary font-semibold">2,450 / 3,000</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full gradient-primary w-[82%] transition-all"></div>
                   </div>
                 </div>
-                <Button className="w-full gradient-accent" size="sm">
-                  <Icon name="Settings" className="mr-2 h-4 w-4" />
-                  Настройки профиля
+
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-primary">128</div>
+                    <div className="text-xs text-muted-foreground">Стримов</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-secondary">15.2K</div>
+                    <div className="text-xs text-muted-foreground">Подписчики</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-accent">4.8</div>
+                    <div className="text-xs text-muted-foreground">Рейтинг</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-border/50">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Heart" className="h-4 w-4 text-red-500" />
+                      <span>Донатов получено</span>
+                    </div>
+                    <span className="font-semibold">42,500 ₽</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Clock" className="h-4 w-4 text-blue-500" />
+                      <span>Время в эфире</span>
+                    </div>
+                    <span className="font-semibold">324ч</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Trophy" className="h-4 w-4 text-yellow-500" />
+                      <span>Достижений</span>
+                    </div>
+                    <span className="font-semibold">18/25</span>
+                  </div>
+                </div>
+
+                <Button className="w-full gradient-accent" size="sm" onClick={() => setIsProfileOpen(true)}>
+                  <Icon name="User" className="mr-2 h-4 w-4" />
+                  Открыть профиль
                 </Button>
               </div>
             </Card>
           </aside>
         </div>
       </main>
+
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Профиль пользователя</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <Avatar className="h-24 w-24 border-4 border-primary">
+                <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" />
+                <AvatarFallback className="gradient-primary text-white text-3xl">U</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold">UserName</h3>
+                <p className="text-muted-foreground">@username_pro</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className="gradient-primary">Level 12</Badge>
+                  <Badge variant="outline">Streamer</Badge>
+                  <Badge variant="secondary">Verified ✓</Badge>
+                </div>
+                <p className="text-sm mt-3 text-foreground/80">
+                  Профессиональный стример и контент-мейкер. Создаю контент на тему игр, обучения и развлечений. 
+                  Стримлю каждый день с 18:00 до 23:00 МСК.
+                </p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Icon name="BarChart3" className="h-5 w-5 text-primary" />
+                Статистика
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5">
+                  <div className="text-3xl font-bold text-primary">128</div>
+                  <div className="text-xs text-muted-foreground mt-1">Стримов</div>
+                </Card>
+                <Card className="p-4 text-center bg-gradient-to-br from-secondary/10 to-secondary/5">
+                  <div className="text-3xl font-bold text-secondary">15.2K</div>
+                  <div className="text-xs text-muted-foreground mt-1">Подписчиков</div>
+                </Card>
+                <Card className="p-4 text-center bg-gradient-to-br from-accent/10 to-accent/5">
+                  <div className="text-3xl font-bold text-accent">4.8</div>
+                  <div className="text-xs text-muted-foreground mt-1">Рейтинг</div>
+                </Card>
+                <Card className="p-4 text-center bg-gradient-to-br from-yellow-500/10 to-yellow-500/5">
+                  <div className="text-3xl font-bold text-yellow-500">324ч</div>
+                  <div className="text-xs text-muted-foreground mt-1">В эфире</div>
+                </Card>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Icon name="Trophy" className="h-5 w-5 text-yellow-500" />
+                Достижения (18/25)
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: '🎮', name: 'Первый стрим', desc: 'Провести первую трансляцию', unlocked: true },
+                  { icon: '💯', name: '100 стримов', desc: 'Провести 100 трансляций', unlocked: true },
+                  { icon: '👥', name: '10K подписчиков', desc: 'Набрать 10,000 подписчиков', unlocked: true },
+                  { icon: '💎', name: 'Щедрость', desc: 'Получить 50,000₽ донатов', unlocked: false },
+                  { icon: '⭐', name: 'Топ стример', desc: 'Войти в топ-10 по рейтингу', unlocked: false },
+                  { icon: '🔥', name: 'Марафон', desc: 'Стримить 12 часов подряд', unlocked: true },
+                ].map((achievement, i) => (
+                  <Card 
+                    key={i}
+                    className={`p-3 ${achievement.unlocked ? 'border-primary/50 bg-primary/5' : 'opacity-50'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="text-2xl">{achievement.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold">{achievement.name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{achievement.desc}</div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Icon name="Wallet" className="h-5 w-5 text-green-500" />
+                Финансы
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Heart" className="h-5 w-5 text-red-500" />
+                    <span className="font-medium">Донатов получено</span>
+                  </div>
+                  <span className="text-xl font-bold text-green-500">42,500 ₽</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Users" className="h-5 w-5 text-blue-500" />
+                    <span className="font-medium">Подписки платные</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-500">234</span>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex gap-2">
+              <Button className="flex-1 gradient-primary">
+                <Icon name="Edit" className="mr-2 h-4 w-4" />
+                Редактировать профиль
+              </Button>
+              <Button variant="outline" className="flex-1">
+                <Icon name="Settings" className="mr-2 h-4 w-4" />
+                Настройки
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
